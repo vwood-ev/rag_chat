@@ -37,6 +37,8 @@ if 'vector_index' not in st.session_state:
     with st.spinner("Indexing document..."): 
         st.session_state.vector_index = rag_chat.get_index(bedrock)
 
+print(dir(st.session_state.vector_index))
+
 if show_raw:
     for message in st.session_state.chat_history:
         st.text_area("", message)
@@ -56,10 +58,11 @@ if input_text:
         st.markdown(input_text)
     
     st.session_state.chat_history.append({"role":"user", "text":input_text})
-    
-    chat_response = rag_chat.get_rag_chat_response(client=bedrock, input_text=input_text,
-                                                   memory=st.session_state.memory, index=st.session_state.vector_index,
-                                                   output_key='answer')
+
+    chat_response = rag_chat.get_rag_chat_response(
+        client=bedrock, input_text=input_text,
+        memory=st.session_state.memory, index=st.session_state.vector_index,
+    )
     
     with st.chat_message("assistant"):
         st.markdown(chat_response['answer'])

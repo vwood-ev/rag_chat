@@ -8,7 +8,11 @@ from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 
+# from langchain.indexes import index
+
+
 # TODO: ConversationalRetrievalChain is deprecated - update using `create_retrieval_chain`
+# TODO: add source metadata to index creator
 
 def get_llm(client):
     model_kwargs = {
@@ -49,16 +53,15 @@ def get_index(client):
     )
     
     index_from_loader = index_creator.from_loaders([loader])
-    
+
     return index_from_loader
 
 def get_memory():
     """
     create memory for this chat session
     """
-
-    # Maintains a history of previous messages
-    memory = ConversationBufferWindowMemory(memory_key = "chat_history", return_messages = True)
+    memory = ConversationBufferWindowMemory(memory_key = "chat_history", return_messages = True, output_key='answer')
+    
     return memory
 
 
@@ -66,10 +69,10 @@ def get_rag_chat_response(client, input_text, memory, index):
     """
     chat client function
     """
-    
     llm = get_llm(client)
     
-    conversation_with_retrieval = ConversationalRetrievalChain.from_llm(llm, index.vectorstore.as_retriever(), memory=memory, verbose=True,
+    conversation_with_retrieval = ConversationalRetrievalChain.from_llm(llm, index.vectorstore.as_retriever(),
+                                                                        memory=memory, verbose=True,
                                                                         return_source_documents=True)
 
     # pass the user message and summary to the model
@@ -77,6 +80,6 @@ def get_rag_chat_response(client, input_text, memory, index):
 
     print(chat_response)
     
-    return chat_response['answer']
+    return chat_response
 
 
